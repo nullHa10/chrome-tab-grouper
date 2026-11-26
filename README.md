@@ -1,12 +1,12 @@
 # Automatic Tab Grouping
 
-A lightweight Chrome extension that keeps your tab sidebar organized by automatically moving new tabs into existing tab groups based on their website domain.
+A lightweight Chrome extension that keeps your tab sidebar organized by automatically moving new tabs into per-window tab groups based on their website domain.
 
 ## Overview
 
 Modern browsers make it easy to create tab groups, but keeping those groups filled manually is repetitive. When you open a new ChatGPT, GitHub, YouTube, Netflix, Google Docs, or Notion tab, you still have to drag it into the correct group.
 
-This extension removes that manual step. When a tab is created or its URL changes, the extension checks the website host and moves the tab into an existing group with a matching title.
+This extension removes that manual step. When a tab is created or its URL changes, the extension checks the website host, then reuses or creates a group with a matching title inside that tab's own window.
 
 ## Problem It Solves
 
@@ -15,18 +15,20 @@ This extension removes that manual step. When a tab is created or its URL change
 - Large tab collections become difficult to scan.
 - Manual organization breaks down when you open many tabs per day.
 
-The extension keeps the group structure you already created and places new tabs into it automatically.
+The extension creates group structure as needed and places new tabs into it automatically, without touching other windows.
 
 ## Main Features
 
 - Groups tabs by website domain only.
-- Uses your existing tab groups; it does not create new groups.
+- Reuses an existing group in the same window, or creates one lazily when the first matching tab appears.
+- Creates no placeholder tabs and no groups in advance.
 - Leaves unknown websites ungrouped.
 - Uses exact group names to avoid accidental matches.
+- Keeps each Chrome window independent; groups are never shared across windows.
 - Supports subdomains such as `gist.github.com`, `www.youtube.com`, `web.whatsapp.com`, and `docs.google.com`.
 - Requests only two Chrome permissions: `tabs` and `tabGroups`.
 - Does not read page content, access bookmarks, access passwords, or send data anywhere.
-- Includes a small test file for the domain classification rules.
+- Includes tests for classification rules and service-worker grouping behavior.
 
 ## Supported Groups and Example Websites
 
@@ -54,26 +56,26 @@ Examples:
 ## How Automatic Grouping Works
 
 1. Chrome starts the extension's background service worker.
-2. The extension listens for two events:
-   - a new tab is created;
-   - a tab's URL changes.
+2. The extension listens for tab creation, tab URL changes, and new windows.
 3. The extension sends the URL to the classification function.
 4. The classification function extracts the hostname, lowercases it, removes a leading `www.`, and compares it with the rule list.
-5. If a rule matches, the extension asks Chrome for all existing tab groups.
+5. If a rule matches, the extension asks Chrome for tab groups in the tab's window.
 6. It finds the first group whose title exactly matches the target group name.
-7. It moves the tab into that group.
-8. If no rule matches, or if the required group does not exist, nothing happens.
+7. If no matching group exists in that window, it creates one from the matching tab.
+8. It moves the tab into that group, never into a group from another window.
+9. If no rule matches, nothing happens.
 
-The extension never creates tab groups and never deletes tabs.
+The extension never creates placeholder tabs and never deletes tabs.
 
 ## Project Files
 
 | File | Purpose |
 | --- | --- |
 | `manifest.json` | Chrome extension manifest. Declares Manifest V3, the extension name, permissions, and the background service worker. |
-| `sw.js` | Background service worker. Listens for tab events and moves tabs into matching existing groups. |
+| `sw.js` | Background service worker. Listens for tab and window events, reuses or creates same-window groups, and moves tabs into them. |
 | `classify.js` | Domain rulebook. Converts a URL into a group title, or returns `null` for unknown websites. |
 | `classify.test.mjs` | Test file. Checks that group names and URL classifications are correct. |
+| `sw.test.mjs` | Test file. Checks same-window reuse, lazy creation, race safety, and new-window organization. |
 | `package.json` | Marks the project as an ES module project so the test file can import `classify.js`. |
 
 ## Technologies Used
@@ -88,9 +90,9 @@ The extension never creates tab groups and never deletes tabs.
 ## Requirements
 
 - Google Chrome with tab group support and Manifest V3 support.
-- The eight required tab groups must already exist.
-- Group names must match exactly, including capitalization, spaces, and `&`.
-- At least one tab should remain in each group; if all tabs in a group are closed, Chrome removes that group.
+- Groups are created automatically from the first matching tab in each window.
+- Existing group names must match exactly, including capitalization, spaces, and `&`.
+- If all tabs in a group are closed, Chrome removes it and the extension recreates it when another matching tab appears.
 - The extracted extension folder must stay on disk after installation.
 - Developer mode must be enabled in `chrome://extensions` to load an unpacked extension.
 
@@ -137,21 +139,11 @@ sudo apt update
 sudo apt install unzip
 ```
 
-### Step 3: Create the Eight Required Tab Groups
+### Step 3: No Group Setup Needed
 
-The extension does not create groups. Create them first:
+The extension creates groups automatically. Open the websites you want and the matching groups appear in that window.
 
-1. Open Google Chrome.
-2. Open eight new tabs.
-3. For each tab:
-   1. Right-click the tab.
-   2. Click **Add tab to new group**.
-   3. Choose any color.
-   4. Type the exact group name.
-   5. Press **Enter**.
-4. Keep at least one tab in every group.
-
-Use these exact names:
+These are the group names it uses:
 
 ```text
 AI & ChatGPT
@@ -222,19 +214,11 @@ A card named **Automatic Tab Grouping** should appear.
 7. Open the extracted folder containing `manifest.json`.
 8. Keep this folder in place.
 
-### Step 3: Create the Eight Required Tab Groups
+### Step 3: No Group Setup Needed
 
-1. Open Google Chrome.
-2. Open eight new tabs.
-3. For each tab:
-   1. Right-click the tab.
-   2. Click **Add tab to new group**.
-   3. Choose any color.
-   4. Type the exact group name.
-   5. Press **Enter**.
-4. Keep at least one tab in every group.
+The extension creates groups automatically. Open the websites you want and the matching groups appear in that window.
 
-Use these exact names:
+These are the group names it uses:
 
 ```text
 AI & ChatGPT
@@ -297,7 +281,7 @@ A card named **Automatic Tab Grouping** should appear.
 If Node.js is installed, run the classification tests from the project folder:
 
 ```bash
-node --test classify.test.mjs
+node --test classify.test.mjs sw.test.mjs
 ```
 
 This checks that the group names and supported domains are correct. Node.js is not required to use the extension in Chrome.
@@ -309,9 +293,10 @@ If you replace the files in the extracted folder, return to `chrome://extensions
 ## Limitations
 
 - The extension only supports domains listed in `classify.js`.
-- It does not create missing tab groups.
+- It creates groups only when a matching tab appears; it never creates empty groups or placeholder tabs.
+- Tab groups are window-specific; a group created in one window is never reused in another.
 - It does not remove a tab from its group if the tab later navigates to an unsupported website.
-- If multiple groups have the same title, the first matching group is used.
+- If multiple matching groups somehow exist in the same window, the first one is used.
 - Unpacked extensions show a Developer mode warning in Chrome; this is normal.
 - The folder must remain available; deleting or moving it can break the extension.
 - Installing an unpacked extension is manual in current branded Chrome versions. Command-line loading and DevTools-loaded extensions are not persistent.

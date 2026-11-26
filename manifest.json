@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Automatic Tab Grouping",
   "version": "1.0",
-  "description": "Groups new tabs by domain using existing tab groups.",
+  "description": "Automatically groups tabs by domain inside each Chrome window.",
   "permissions": ["tabs", "tabGroups"],
   "background": { "service_worker": "sw.js", "type": "module" }
 }
