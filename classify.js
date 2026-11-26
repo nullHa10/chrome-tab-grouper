@@ -1,5 +1,6 @@
 const RULES = [
   ['AI & ChatGPT', ['chatgpt.com', 'openai.com']],
+  ['GitHub', ['github.com']],
   ['YouTube & Videos', ['youtube.com', 'youtu.be', 'youtube-nocookie.com']],
   ['Social Media & Messaging', ['whatsapp.com', 'x.com', 'twitter.com', 't.co']],
   ['Movies & Anime', ['netflix.com', 'moviztime.site']],
