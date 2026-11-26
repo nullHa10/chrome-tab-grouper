@@ -5,6 +5,7 @@ import { classifyUrl, GROUP_TITLES } from './classify.js';
 test('group titles match existing Chrome groups exactly', () => {
   assert.deepEqual(GROUP_TITLES, [
     'AI & ChatGPT',
+    'GitHub',
     'YouTube & Videos',
     'Social Media & Messaging',
     'Movies & Anime',
@@ -12,6 +13,11 @@ test('group titles match existing Chrome groups exactly', () => {
     'Research & University',
     'Google Tools'
   ]);
+});
+
+test('classifies GitHub URLs into the GitHub group', () => {
+  assert.equal(classifyUrl('https://github.com/'), 'GitHub');
+  assert.equal(classifyUrl('https://gist.github.com/user/repo'), 'GitHub');
 });
 
 test('classifies representative URLs from every group', () => {
@@ -34,4 +40,6 @@ test('leaves unknown and lookalike domains ungrouped', () => {
   assert.equal(classifyUrl('https://example.com/'), null);
   assert.equal(classifyUrl('https://netflix.com.evil.test/'), null);
   assert.equal(classifyUrl('https://not-netflix.com/'), null);
+  assert.equal(classifyUrl('https://github.com.evil.test/'), null);
+  assert.equal(classifyUrl('https://not-github.com/'), null);
 });
