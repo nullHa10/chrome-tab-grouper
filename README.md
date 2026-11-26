@@ -4,7 +4,7 @@ A lightweight Chrome extension that keeps your tab sidebar organized by automati
 
 ## Overview
 
-Modern browsers make it easy to create tab groups, but keeping those groups filled manually is repetitive. When you open a new YouTube, ChatGPT, Netflix, Google Docs, or Notion tab, you still have to drag it into the correct group.
+Modern browsers make it easy to create tab groups, but keeping those groups filled manually is repetitive. When you open a new ChatGPT, GitHub, YouTube, Netflix, Google Docs, or Notion tab, you still have to drag it into the correct group.
 
 This extension removes that manual step. When a tab is created or its URL changes, the extension checks the website host and moves the tab into an existing group with a matching title.
 
@@ -23,7 +23,7 @@ The extension keeps the group structure you already created and places new tabs 
 - Uses your existing tab groups; it does not create new groups.
 - Leaves unknown websites ungrouped.
 - Uses exact group names to avoid accidental matches.
-- Supports subdomains such as `www.youtube.com`, `web.whatsapp.com`, and `docs.google.com`.
+- Supports subdomains such as `gist.github.com`, `www.youtube.com`, `web.whatsapp.com`, and `docs.google.com`.
 - Requests only two Chrome permissions: `tabs` and `tabGroups`.
 - Does not read page content, access bookmarks, access passwords, or send data anywhere.
 - Includes a small test file for the domain classification rules.
@@ -33,6 +33,7 @@ The extension keeps the group structure you already created and places new tabs 
 | Group name | Example domains |
 | --- | --- |
 | `AI & ChatGPT` | `chatgpt.com`, `openai.com` |
+| `GitHub` | `github.com`, `gist.github.com` |
 | `YouTube & Videos` | `youtube.com`, `youtu.be`, `youtube-nocookie.com` |
 | `Social Media & Messaging` | `whatsapp.com`, `x.com`, `twitter.com`, `t.co` |
 | `Movies & Anime` | `netflix.com`, `moviztime.site` |
@@ -42,8 +43,10 @@ The extension keeps the group structure you already created and places new tabs 
 
 Examples:
 
-- `https://www.youtube.com/watch?v=...` goes to `YouTube & Videos`.
 - `https://chatgpt.com/c/...` goes to `AI & ChatGPT`.
+- `https://github.com/owner/repo` goes to `GitHub`.
+- `https://gist.github.com/user/abc123` goes to `GitHub`.
+- `https://www.youtube.com/watch?v=...` goes to `YouTube & Videos`.
 - `https://web.whatsapp.com/` goes to `Social Media & Messaging`.
 - `https://docs.google.com/document/d/...` goes to `Google Tools`.
 - `https://example.com/` stays ungrouped.
@@ -85,7 +88,7 @@ The extension never creates tab groups and never deletes tabs.
 ## Requirements
 
 - Google Chrome with tab group support and Manifest V3 support.
-- The seven required tab groups must already exist.
+- The eight required tab groups must already exist.
 - Group names must match exactly, including capitalization, spaces, and `&`.
 - At least one tab should remain in each group; if all tabs in a group are closed, Chrome removes that group.
 - The extracted extension folder must stay on disk after installation.
@@ -134,12 +137,12 @@ sudo apt update
 sudo apt install unzip
 ```
 
-### Step 3: Create the Seven Required Tab Groups
+### Step 3: Create the Eight Required Tab Groups
 
 The extension does not create groups. Create them first:
 
 1. Open Google Chrome.
-2. Open seven new tabs.
+2. Open eight new tabs.
 3. For each tab:
    1. Right-click the tab.
    2. Click **Add tab to new group**.
@@ -152,6 +155,7 @@ Use these exact names:
 
 ```text
 AI & ChatGPT
+GitHub
 YouTube & Videos
 Social Media & Messaging
 Movies & Anime
@@ -191,10 +195,17 @@ A card named **Automatic Tab Grouping** should appear.
 5. Open another tab and visit:
 
    ```text
+   https://github.com/
+   ```
+
+6. The tab should move automatically into `GitHub`.
+7. Open another tab and visit:
+
+   ```text
    https://example.com/
    ```
 
-6. The `example.com` tab should stay ungrouped.
+8. The `example.com` tab should stay ungrouped.
 
 ---
 
@@ -211,10 +222,10 @@ A card named **Automatic Tab Grouping** should appear.
 7. Open the extracted folder containing `manifest.json`.
 8. Keep this folder in place.
 
-### Step 3: Create the Seven Required Tab Groups
+### Step 3: Create the Eight Required Tab Groups
 
 1. Open Google Chrome.
-2. Open seven new tabs.
+2. Open eight new tabs.
 3. For each tab:
    1. Right-click the tab.
    2. Click **Add tab to new group**.
@@ -227,6 +238,7 @@ Use these exact names:
 
 ```text
 AI & ChatGPT
+GitHub
 YouTube & Videos
 Social Media & Messaging
 Movies & Anime
@@ -266,10 +278,17 @@ A card named **Automatic Tab Grouping** should appear.
 5. Open another tab and visit:
 
    ```text
+   https://github.com/
+   ```
+
+6. The tab should move automatically into `GitHub`.
+7. Open another tab and visit:
+
+   ```text
    https://example.com/
    ```
 
-6. The `example.com` tab should stay ungrouped.
+8. The `example.com` tab should stay ungrouped.
 
 ---
 
